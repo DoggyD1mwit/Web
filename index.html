@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Link Collector</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f8f9fb;
+      max-width: 600px;
+      margin: 40px auto;
+      padding: 2em;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    h1 {
+      text-align: center;
+      color: #4b4b7e;
+    }
+    form {
+      display: flex;
+      gap: 0.5em;
+      margin-bottom: 1.5em;
+    }
+    input[type="text"], input[type="url"] {
+      flex: 1;
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 0.5em 1em;
+      background: #4b4b7e;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #39396b;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+    li {
+      background: white;
+      margin-bottom: 0.8em;
+      padding: 0.8em 1em;
+      border-radius: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .desc {
+      color: #6b6b6b;
+      font-size: 0.95em;
+      margin-left: 0.5em;
+    }
+    .remove {
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.3em 0.7em;
+      cursor: pointer;
+      font-size: 0.9em;
+      margin-left: 1em;
+    }
+    .remove:hover {
+      background: #b71c1c;
+    }
+  </style>
+</head>
+<body>
+  <h1>Link Collector</h1>
+  <form id="linkForm" autocomplete="off">
+    <input type="url" id="urlInput" placeholder="Paste link (https://...)" required />
+    <input type="text" id="descInput" placeholder="Description (optional)" />
+    <button type="submit">Add Link</button>
+  </form>
+  <ul id="linkList"></ul>
+
+  <script>
+    const form = document.getElementById('linkForm');
+    const urlInput = document.getElementById('urlInput');
+    const descInput = document.getElementById('descInput');
+    const linkList = document.getElementById('linkList');
+
+    // Load links from localStorage
+    let links = JSON.parse(localStorage.getItem('links') || '[]');
+    renderLinks();
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const url = urlInput.value.trim();
+      const desc = descInput.value.trim();
+      if (!url) return;
+      links.push({ url, desc });
+      saveAndRender();
+      urlInput.value = '';
+      descInput.value = '';
+      urlInput.focus();
+    });
+
+    function renderLinks() {
+      linkList.innerHTML = '';
+      links.forEach((link, idx) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = link.url;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = link.url.replace(/^https?:\/\//,'');
+        li.appendChild(a);
+        if (link.desc) {
+          const span = document.createElement('span');
+          span.className = 'desc';
+          span.textContent = `- ${link.desc}`;
+          li.appendChild(span);
+        }
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'remove';
+        removeBtn.textContent = 'Remove';
+        removeBtn.onclick = () => {
+          links.splice(idx, 1);
+          saveAndRender();
+        };
+        li.appendChild(removeBtn);
+        linkList.appendChild(li);
+      });
+    }
+
+    function saveAndRender() {
+      localStorage.setItem('links', JSON.stringify(links));
+      renderLinks();
+    }
+  </script>
+</body>
+</html>
